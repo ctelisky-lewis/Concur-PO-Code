@@ -2,7 +2,7 @@ import csv
 import os
 import re
 import tempfile
-from pathlib import Path
+from datetime import datetime, timezone
 from pathlib import Path
 from azure.storage.fileshare import ShareServiceClient
 from azure.identity import DefaultAzureCredential
@@ -26,7 +26,11 @@ SECRET_NAME = "Concur-PO-Storage-Account-Key"
 PATH_300 = "300 rows.csv"
 PATH_210_220 = "210 and 220 rows.csv"
 PATH_200 = "200 rows.csv"
-PATH_OUTPUT = "combined_by_po_300_210_220_200.csv"
+
+def generate_output_filename():
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    return f"list_p1208057kcft_{timestamp}.csv"
+
 
 # Local temp directory for processing
 LOCAL_TEMP_DIR = Path(tempfile.gettempdir()) / "concur"  # change as needed
@@ -102,7 +106,9 @@ def main():
     local_300 = LOCAL_TEMP_DIR / "300 rows.csv"
     local_210_220 = LOCAL_TEMP_DIR / "210 and 220 rows.csv"
     local_200 = LOCAL_TEMP_DIR / "200 rows.csv"
-    local_output = LOCAL_TEMP_DIR / "combined_by_po_300_210_220_200.csv"
+    dynamic_output_name = generate_output_filename()
+    local_output = LOCAL_TEMP_DIR / dynamic_output_name
+
 
     # Connect to the file share
     storage_key = get_storage_account_key()
@@ -180,5 +186,5 @@ def main():
     # ==========================
     # 3) Upload result back to Azure File Share
     # ==========================
-    upload_file_to_share(share_client, local_output, PATH_OUTPUT)
-    print(f"Uploaded combined file to share '{FILE_SHARE_NAME}' as '{PATH_OUTPUT}'")
+    upload_file_to_share(share_client, local_output, dynamic_output_name)
+    print(f"Uploaded combined file to share '{FILE_SHARE_NAME}' as '{dynamic_output_name}'")
