@@ -179,7 +179,7 @@ def main():
     with local_output.open("w", newline="") as out_f:
         writer = csv.writer(out_f)
         for _, _, _, row in all_rows:
-            writer.writerow(row)
+            writer.writerow(row[3:])
 
     print(f"Combined file created locally at: {local_output}")
 
